@@ -1,0 +1,357 @@
+package com.mycompany.notepad;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.util.regex.*;
+
+public class NotepadMVC {
+
+    // Model Class: Manages the text data
+    static class NotepadModel {
+        private String text;
+
+        public NotepadModel() {
+            text = "";
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String text) {
+            this.text = text;
+        }
+
+        // Calculate word count
+        public int getWordCount() {
+            if (text == null || text.isEmpty()) {
+                return 0;
+            }
+            String[] words = text.split("\\s+");
+            return words.length;
+        }
+
+        // Calculate line count
+        public int getLineCount() {
+            if (text == null || text.isEmpty()) {
+                return 0;
+            }
+            return text.split("\n").length;
+        }
+
+        // Calculate special character count
+        public int getSpecialCharacterCount() {
+            int count = 0;
+            for (char c : text.toCharArray()) {
+                if (!Character.isLetterOrDigit(c) && !Character.isWhitespace(c)) {
+                    count++;
+                }
+            }
+            return count;
+        }
+    }
+
+    // View Class: Manages the user interface
+    static class NotepadView {
+        private JFrame frame;
+        private JTextArea textArea;
+        private JMenuBar menuBar;
+        private JMenu fileMenu, editMenu, viewMenu, settingsMenu;
+        private JMenuItem newItem, openItem, saveItem, saveAsItem, exitItem;
+        private JMenuItem wordCountItem, lineCountItem, specialCharCountItem, fontItem;
+        private JLabel statusBar;
+        private Font currentFont;
+
+        public NotepadView() {
+            frame = new JFrame("Notepad MVC with Advanced Features");
+            textArea = new JTextArea();
+            currentFont = new Font("Arial", Font.PLAIN, 14);
+            textArea.setFont(currentFont);
+
+            menuBar = new JMenuBar();
+            fileMenu = new JMenu("File");
+            editMenu = new JMenu("Edit");
+            viewMenu = new JMenu("View");
+            settingsMenu = new JMenu("Settings");
+
+            newItem = new JMenuItem("New");
+            openItem = new JMenuItem("Open");
+            saveItem = new JMenuItem("Save");
+            saveAsItem = new JMenuItem("Save As");
+            exitItem = new JMenuItem("Exit");
+
+            wordCountItem = new JMenuItem("Word Count");
+            lineCountItem = new JMenuItem("Line Count");
+            specialCharCountItem = new JMenuItem("Special Character Count");
+            fontItem = new JMenuItem("Font");
+
+            // Setting up the menu
+            fileMenu.add(newItem);
+            fileMenu.add(openItem);
+            fileMenu.add(saveItem);
+            fileMenu.add(saveAsItem);
+            fileMenu.addSeparator();
+            fileMenu.add(exitItem);
+
+            editMenu.add(wordCountItem);
+            editMenu.add(lineCountItem);
+            editMenu.add(specialCharCountItem);
+
+            settingsMenu.add(fontItem);
+
+            menuBar.add(fileMenu);
+            menuBar.add(editMenu);
+            menuBar.add(viewMenu);
+            menuBar.add(settingsMenu);
+
+            statusBar = new JLabel("Word Count: 0  Line Count: 0  Special Characters: 0");
+            statusBar.setFont(new Font("Arial", Font.PLAIN, 12));
+            frame.setJMenuBar(menuBar);
+            frame.add(new JScrollPane(textArea), BorderLayout.CENTER);
+            frame.add(statusBar, BorderLayout.SOUTH);
+
+            frame.setSize(600, 400);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setVisible(true);
+        }
+
+        // Getters for UI components
+        public JTextArea getTextArea() {
+            return textArea;
+        }
+
+        public JMenuItem getNewItem() {
+            return newItem;
+        }
+
+        public JMenuItem getOpenItem() {
+            return openItem;
+        }
+
+        public JMenuItem getSaveItem() {
+            return saveItem;
+        }
+
+        public JMenuItem getSaveAsItem() {
+            return saveAsItem;
+        }
+
+        public JMenuItem getExitItem() {
+            return exitItem;
+        }
+
+        public JMenuItem getWordCountItem() {
+            return wordCountItem;
+        }
+
+        public JMenuItem getLineCountItem() {
+            return lineCountItem;
+        }
+
+        public JMenuItem getSpecialCharCountItem() {
+            return specialCharCountItem;
+        }
+
+        public JMenuItem getFontItem() {
+            return fontItem;
+        }
+
+        public void setText(String text) {
+            textArea.setText(text);
+        }
+
+        public void updateStatus(int wordCount, int lineCount, int specialCharCount) {
+            statusBar.setText("Word Count: " + wordCount + "  Line Count: " + lineCount + "  Special Characters: " + specialCharCount);
+        }
+
+        // Method to display font selection dialog
+        public Font getFontSelection() {
+            return JFontChooser.showDialog(frame, "Choose Font", textArea.getFont());
+        }
+
+        // Add action listeners for menu items
+        public void addActionListener(ActionListener listener) {
+            newItem.addActionListener(listener);
+            openItem.addActionListener(listener);
+            saveItem.addActionListener(listener);
+            saveAsItem.addActionListener(listener);
+            exitItem.addActionListener(listener);
+            wordCountItem.addActionListener(listener);
+            lineCountItem.addActionListener(listener);
+            specialCharCountItem.addActionListener(listener);
+            fontItem.addActionListener(listener);
+        }
+
+        private String openFileDialog() {
+            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        }
+
+        private void showMessage(String error_opening_file) {
+            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        }
+
+        private String saveFileDialog() {
+            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        }
+
+        private int confirmExit() {
+            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        }
+    }
+
+    // Controller Class: Manages interactions between Model and View
+    static class NotepadController {
+        private NotepadModel model;
+        private NotepadView view;
+
+        public NotepadController(NotepadModel model, NotepadView view) {
+            this.model = model;
+            this.view = view;
+
+            // Register listeners
+            view.addActionListener(new MenuActionListener());
+        }
+
+        class MenuActionListener implements ActionListener {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String command = e.getActionCommand();
+
+                switch (command) {
+                    case "New":
+                        handleNewFile();
+                        break;
+                    case "Open":
+                        handleOpenFile();
+                        break;
+                    case "Save":
+                        handleSaveFile();
+                        break;
+                    case "Save As":
+                        handleSaveAsFile();
+                        break;
+                    case "Exit":
+                        handleExit();
+                        break;
+                    case "Word Count":
+                        handleWordCount();
+                        break;
+                    case "Line Count":
+                        handleLineCount();
+                        break;
+                    case "Special Character Count":
+                        handleSpecialCharCount();
+                        break;
+                    case "Font":
+                        handleFont();
+                        break;
+                }
+            }
+        }
+
+        private void handleNewFile() {
+            model.setText("");
+            view.setText("");
+            view.updateStatus(0, 0, 0);
+        }
+
+        private void handleOpenFile() {
+            String filePath = view.openFileDialog();
+            if (filePath != null) {
+                try {
+                    String content = readFile(filePath);
+                    model.setText(content);
+                    view.setText(content);
+                    updateStatus();
+                } catch (IOException e) {
+                    view.showMessage("Error opening file.");
+                }
+            }
+        }
+
+        private void handleSaveFile() {
+            String filePath = view.saveFileDialog();
+            if (filePath != null) {
+                try {
+                    writeFile(filePath, model.getText());
+                } catch (IOException e) {
+                    view.showMessage("Error saving file.");
+                }
+            }
+        }
+
+        private void handleSaveAsFile() {
+            String filePath = view.saveFileDialog();
+            if (filePath != null) {
+                try {
+                    writeFile(filePath, model.getText());
+                } catch (IOException e) {
+                    view.showMessage("Error saving file.");
+                }
+            }
+        }
+
+        private void handleExit() {
+            if (view.confirmExit() == JOptionPane.YES_OPTION) {
+                System.exit(0);
+            }
+        }
+
+        private void handleWordCount() {
+            int wordCount = model.getWordCount();
+            view.showMessage("Word Count: " + wordCount);
+        }
+
+        private void handleLineCount() {
+            int lineCount = model.getLineCount();
+            view.showMessage("Line Count: " + lineCount);
+        }
+
+        private void handleSpecialCharCount() {
+            int specialCharCount = model.getSpecialCharacterCount();
+            view.showMessage("Special Character Count: " + specialCharCount);
+        }
+
+        private void handleFont() {
+            Font newFont = view.getFontSelection();
+            if (newFont != null) {
+                view.getTextArea().setFont(newFont);
+            }
+        }
+
+        private void updateStatus() {
+            int wordCount = model.getWordCount();
+            int lineCount = model.getLineCount();
+            int specialCharCount = model.getSpecialCharacterCount();
+            view.updateStatus(wordCount, lineCount, specialCharCount);
+        }
+
+        // Read content from file
+        private String readFile(String filePath) throws IOException {
+            BufferedReader reader = new BufferedReader(new FileReader(filePath));
+            StringBuilder content = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line).append("\n");
+            }
+            reader.close();
+            return content.toString();
+        }
+
+        // Write content to file
+        private void writeFile(String filePath, String content) throws IOException {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
+            writer.write(content);
+            writer.close();
+        }
+    }
+
+    // Main Class to run the application
+    public static void main(String[] args) {
+        NotepadModel model = new NotepadModel();
+        NotepadView view = new NotepadView();
+        new NotepadController(model, view);
+    }
+}
